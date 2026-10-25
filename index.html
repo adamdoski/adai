@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdAI</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ===== AdAI animations ===== */
+    body { background: #080814 !important; color: #eaeaff; }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -20%;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(124,58,237,.55), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(37,99,235,.50), transparent 40%),
+        radial-gradient(circle at 60% 80%, rgba(20,184,166,.45), transparent 45%);
+      filter: blur(60px);
+      animation: aurora 18s ease-in-out infinite alternate;
+    }
+    @keyframes aurora {
+      0%   { transform: translate(0,0) scale(1) rotate(0deg); }
+      50%  { transform: translate(4%,-3%) scale(1.15) rotate(8deg); }
+      100% { transform: translate(-4%,3%) scale(1.05) rotate(-6deg); }
+    }
+
+    .sidebar {
+      background: rgba(255,255,255,.06) !important;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-right: 1px solid rgba(255,255,255,.10);
+      color: #fff;
+    }
+    .sidebar .nav { color: #fff; transition: background .25s, box-shadow .25s; }
+    .sidebar .nav:hover:not(:disabled) { background: rgba(167,139,250,.20); box-shadow: 0 0 14px rgba(167,139,250,.35); }
+    .sidebar .nav.active { background: rgba(167,139,250,.28); }
+
+    .sidebar h1 {
+      background: linear-gradient(90deg, #a78bfa, #38bdf8, #2dd4bf, #a78bfa);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shine 6s linear infinite, glow 3s ease-in-out infinite;
+    }
+    @keyframes shine { to { background-position: 300% 0; } }
+    @keyframes glow { 50% { filter: drop-shadow(0 0 10px rgba(167,139,250,.9)); } }
+
+    main, main h2, main header { color: #eaeaff; }
+    input, select, textarea {
+      background: rgba(255,255,255,.08) !important;
+      color: #fff !important;
+      border: 1px solid rgba(255,255,255,.18) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: box-shadow .25s, border-color .25s;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(234,234,255,.55); }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #a78bfa !important;
+      box-shadow: 0 0 16px rgba(167,139,250,.55);
+    }
+
+    #log > * {
+      animation: slideIn .45s cubic-bezier(.34,1.56,.64,1) both;
+      background: rgba(255,255,255,.08);
+      color: #f0f0ff;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(14px) scale(.96); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 6px;
+      padding: 12px 16px;
+      width: fit-content;
+      background: transparent !important;
+      border: none !important;
+    }
+    .typing-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #a78bfa;
+      box-shadow: 0 0 10px #a78bfa;
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: .15s; }
+    .typing-dots span:nth-child(3) { animation-delay: .30s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: .5; }
+      40% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ===== Language Selector Bar above Input ===== */
+    .language-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .language-bar label {
+      opacity: 0.75;
+    }
+    .language-bar select {
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ===== Photo upload ===== */
+    #plusBtn {
+      width: 40px;
+      min-width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.10);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      transition: box-shadow .25s, transform .2s;
+    }
+    #plusBtn:hover { box-shadow: 0 0 14px rgba(167,139,250,.7); transform: scale(1.08); }
+    #preview {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+    }
+    #preview.show { display: flex; }
+    #previewImg { height: 64px; border-radius: 10px; border: 1px solid rgba(255,255,255,.25); }
+    #removeImg {
+      background: rgba(255,255,255,.12);
+      border: none;
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .photo-msg { padding: 8px; width: fit-content; max-width: 260px; }
+    .photo-msg img { display: block; max-width: 100%; border-radius: 8px; }
+
+    /* ===== History ===== */
+    .hist-btn {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      margin: 10px 0 4px;
+      background: rgba(167,139,250,.18);
+      border: 1px dashed rgba(167,139,250,.5);
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: box-shadow .25s;
+    }
+    .hist-btn:hover { box-shadow: 0 0 14px rgba(167,139,250,.5); }
+    .history-label { font-size: 12px; opacity: .6; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: .08em; }
+    #historyList { max-height: 38vh; overflow-y: auto; }
+    .history-item { display: flex; align-items: center; gap: 4px; border-radius: 8px; }
+    .history-item:hover { background: rgba(255,255,255,.08); }
+    .history-item.active { background: rgba(167,139,250,.25); }
+    .history-title {
+      flex: 1; min-width: 0; text-align: left; background: none; border: none; color: #fff;
+      padding: 8px; cursor: pointer; font-size: 14px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .history-del { background: none; border: none; color: #fff; opacity: .5; cursor: pointer; padding: 4px 8px; font-size: 16px; }
+    .history-del:hover { opacity: 1; }
+    .msg .thumb-img { display: block; max-width: 160px; border-radius: 8px; margin-bottom: 6px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>AdAI</h1>
+    <nav>
+      <button class="nav active" data-tab="messages">Messages</button>
+      <button class="nav" data-tab="agents">Agents</button>
+      <button class="nav soon" disabled>API Keys <small>soon</small></button>
+      <button class="nav soon" disabled>Resources <small>soon</small></button>
+      <button class="nav soon" disabled>Security <small>soon</small></button>
+      <button class="nav soon" disabled>Data settings <small>soon</small></button>
+    </nav>
+    <button type="button" class="hist-btn" id="newChat">+ New chat</button>
+    <div class="history-label">History</div>
+    <div id="historyList"></div>
+    <div class="contact" style="margin-top:auto; padding:12px 0; font-size:13px; opacity:0.85;">
+      Made by Adam<br>
+      <a href="https://guns.lol/adam.doski" target="_blank" rel="noopener noreferrer" style="color:inherit; text-decoration:underline;">Contact me</a>
+    </div>
+  </aside>
+
+  <main>
+    <section id="messages" class="tab active">
+      <header>
+        <span>Agent:</span>
+        <select id="agentSelect"></select>
+        <button id="clearBtn" class="ghost">Clear chat</button>
+      </header>
+      <div id="log"></div>
+      <div id="preview">
+        <img id="previewImg" alt="Selected photo">
+        <button type="button" id="removeImg" title="Remove photo">&times;</button>
+      </div>
+
+      <!-- Language Dropdown right above the typing input -->
+      <div class="language-bar">
+        <label for="chatLanguageSelect">Language:</label>
+        <select id="chatLanguageSelect">
+          <option value="en">English</option>
+          <option value="ku">Kurdish (General)</option>
+          <option value="ku-sorani">Kurdish (Sorani)</option>
+          <option value="ku-badini">Kurdish (Badini)</option>
+          <option value="ku-kurmanji">Kurdish (Kurmanji)</option>
+          <option value="ar">Arabic</option>
+        </select>
+      </div>
+
+      <form id="form">
+        <button type="button" id="plusBtn" title="Add a photo">+</button>
+        <input type="file" id="photoInput" accept="image/*" hidden>
+        <input id="input" placeholder="Type a message..." autocomplete="off">
+        <button type="submit">Send</button>
+      </form>
+    </section>
+
+    <section id="agents" class="tab">
+      <h2>Agents</h2>
+      <form id="agentForm">
+        <input id="agentName" placeholder="Agent name" required>
+        <textarea id="agentInstructions" rows="5" placeholder="Instructions, e.g. You are a friendly teacher who explains simply." required></textarea>
+        <button type="submit">Save agent</button>
+      </form>
+      <div id="agentList"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    (function () {
+      var log = document.getElementById('log');
+      var form = document.getElementById('form');
+      var input = document.getElementById('input');
+      var plusBtn = document.getElementById('plusBtn');
+      var photoInput = document.getElementById('photoInput');
+      var preview = document.getElementById('preview');
+      var previewImg = document.getElementById('previewImg');
+      var removeImg = document.getElementById('removeImg');
+      var chatLanguageSelect = document.getElementById('chatLanguageSelect');
+      if (!log || !form) return;
+
+      var pending = null;   // photo waiting to be sent (data URL)
+      var pendingThumb = null;  // small thumbnail kept in chat history
+      var dots = null, timer = null;
+
+      // ---- Plus button + preview ----
+      function clearPending() {
+        pending = null;
+        pendingThumb = null;
+        photoInput.value = '';
+        preview.classList.remove('show');
+        previewImg.removeAttribute('src');
+      }
+      plusBtn.addEventListener('click', function () { photoInput.click(); });
+      removeImg.addEventListener('click', clearPending);
+
+      photoInput.addEventListener('change', function () {
+        var file = photoInput.files && photoInput.files[0];
+        if (!file) return;
+        if (file.type.indexOf('image/') !== 0) { alert('Please choose an image file.'); return; }
+        var reader = new FileReader();
+        reader.onload = function () {
+          var img = new Image();
+          img.onload = function () {
+            var max = 1280, scale = Math.min(1, max / Math.max(img.width, img.height));
+            var c = document.createElement('canvas');
+            c.width = Math.round(img.width * scale);
+            c.height = Math.round(img.height * scale);
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+            pending = c.toDataURL('image/jpeg', 0.85);
+            var ts = Math.min(1, 160 / Math.max(img.width, img.height));
+            var tc = document.createElement('canvas');
+            tc.width = Math.max(1, Math.round(img.width * ts));
+            tc.height = Math.max(1, Math.round(img.height * ts));
+            tc.getContext('2d').drawImage(img, 0, 0, tc.width, tc.height);
+            pendingThumb = tc.toDataURL('image/jpeg', 0.6);
+            previewImg.src = pending;
+            preview.classList.add('show');
+          };
+          img.onerror = function () { alert('Could not read that image.'); };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      window.adaiPhoto = { getThumb: function () { return pending ? pendingThumb : null; } };
+
+      // ---- Attach the photo and language selection to the request going to the server ----
+      var origFetch = window.fetch.bind(window);
+      window.fetch = function (url, opts) {
+        try {
+          if (opts && typeof opts.body === 'string' && String(url).indexOf('chat') !== -1) {
+            var body = JSON.parse(opts.body);
+            
+            // Attach selected language code
+            if (chatLanguageSelect) {
+              body.language = chatLanguageSelect.value;
+            }
+
+            // Attach pending photo if available
+            if (pending) {
+              var parts = function (text) {
+                return [
+                  { type: 'text', text: text || 'What is in this photo?' },
+                  { type: 'image_url', image_url: { url: pending } }
+                ];
+              };
+              if (Array.isArray(body.messages)) {
+                for (var i = body.messages.length - 1; i >= 0; i--) {
+                  if (body.messages[i].role === 'user') {
+                    if (typeof body.messages[i].content === 'string') {
+                      body.messages[i].content = parts(body.messages[i].content);
+                    }
+                    break;
+                  }
+                }
+              } else {
+                body.messages = [{ role: 'user', content: parts(String(body.message || '')) }];
+              }
+              clearPending();
+            }
+
+            opts = Object.assign({}, opts, { body: JSON.stringify(body) });
+          }
+        } catch (e) { /* if anything goes wrong, send the normal request */ }
+        return origFetch(url, opts);
+      };
+
+      // ---- Typing dots ----
+      function removeDots() {
+        if (dots && dots.parentNode) dots.parentNode.removeChild(dots);
+        dots = null;
+        clearTimeout(timer);
+      }
+      new MutationObserver(function (mutations) {
+        if (!dots) return;
+        for (var i = 0; i < mutations.length; i++) {
+          for (var j = 0; j < mutations[i].addedNodes.length; j++) {
+            if (mutations[i].addedNodes[j] !== dots) { removeDots(); return; }
+          }
+        }
+      }).observe(log, { childList: true });
+
+      form.addEventListener('submit', function () {
+        if (pending && !input.value.trim()) input.value = 'What is in this photo?';
+        setTimeout(function () {
+          removeDots();
+          dots = document.createElement('div');
+          dots.className = 'typing-dots';
+          dots.innerHTML = '<span></span><span></span><span></span>';
+          log.appendChild(dots);
+          log.scrollTop = log.scrollHeight;
+          timer = setTimeout(removeDots, 60000);
+        }, 0);
+      }, true);
+    })();
+  </script>
+</body>
+</html>
