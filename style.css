@@ -1,4 +1,4 @@
-- { box-sizing: border-box; }
+* { box-sizing: border-box; }
 body {
   margin: 0; display: flex; height: 100vh;
   background: #05070d; color: #e6ecff;
@@ -63,7 +63,85 @@ button.ghost { background: #101a33; margin-left: auto; }
 .agent-card p { margin: 0 0 10px; color: #9fb2e8; white-space: pre-wrap; }
 .agent-card button { margin-right: 6px; padding: 6px 12px; }
 .agent-card .danger { background: #991b1b; }
+
+/* ===== Phone layout (screens 700px wide or smaller) ===== */
 @media (max-width: 700px) {
-  .sidebar { width: 140px; }
-  .msg { max-width: 90%; }
+  body {
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    max-height: 38vh;
+    overflow-y: auto;
+  }
+
+  .sidebar h1 {
+    margin: 0 8px 0 0;
+    font-size: 18px;
+  }
+
+  nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .nav {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .nav.soon,
+  .history-label,
+  #historyList,
+  .contact {
+    display: none;
+  }
+
+  .hist-btn {
+    width: auto;
+    margin: 0;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  main {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .tab {
+    padding: 10px;
+  }
+
+  header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .msg {
+    max-width: 90%;
+  }
+
+  select, input, textarea, button {
+    font-size: 16px;
+  }
+
+  #form {
+    gap: 6px;
+  }
+
+  #form input {
+    min-width: 0;
+  }
 }
