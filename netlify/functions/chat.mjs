@@ -24,6 +24,13 @@ const DEFAULT_MODELS = {
   "xAI Grok": "grok-4.7",
 };
 
+// Lets the GitHub Pages site call this function from the browser
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 function findKey() {
   const preferred = ["GROQ_API_KEY", "XAI_API_KEY", "OPENAI_API_KEY", "GROK_API_KEY", "API_KEY"];
   for (const n of preferred) {
@@ -36,11 +43,16 @@ function findKey() {
 function json(status, obj) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...CORS_HEADERS },
   });
 }
 
 export default async (req) => {
+  // Browser permission check before the real request
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   if (req.method !== "POST") {
     return json(405, { error: "Use POST" });
   }
