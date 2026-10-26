@@ -252,6 +252,20 @@
     </section>
   </main>
 
+  <!-- Send all backend calls to the Netlify site, since GitHub Pages has no backend -->
+  <script>
+    (function () {
+      var NETLIFY_URL = 'https://adai-adam.netlify.app';
+      var realFetch = window.fetch.bind(window);
+      window.fetch = function (url, opts) {
+        if (typeof url === 'string' && !/^https?:\/\//i.test(url)) {
+          url = NETLIFY_URL + (url.charAt(0) === '/' ? '' : '/') + url;
+        }
+        return realFetch(url, opts);
+      };
+    })();
+  </script>
+
   <script src="app.js"></script>
   <script>
     (function () {
